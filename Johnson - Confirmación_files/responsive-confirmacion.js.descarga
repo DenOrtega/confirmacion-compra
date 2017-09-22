@@ -1,0 +1,147 @@
+jQuery(document).ready(function($) {
+	
+	   //En casoe de IE, ignorar funciones responsive
+	   if(jQuery.browser.msie && parseFloat(jQuery.browser.version) <= 8){
+		   return;
+	   }
+
+
+      var CambiaInfo =  function (){
+
+
+      	
+        var timer;
+  		jQuery('.actualizado').addClass('showglobe');
+		var accept = "Tus datos personales se han actualizado correctamente";
+		jQuery('.text-globe').html(accept);
+		clearTimeout(timer);
+		timer = setTimeout( refresh , 3000 );
+
+
+
+		//Confirmacion
+		   try{
+			   jQuery('input[id^="responsive-descuento-link-"]').each(function(index, obj){
+				   
+				   var $obj = jQuery(obj);
+				   var id = $obj.attr("id");
+				   jQuery(".target-" + id).html($obj.val());
+				   jQuery(".target-" + id).parents("tr").show();
+				   
+				   jQuery(".target-content-" + id).html(jQuery("div.content-" + id).html());
+				   
+				   
+				 });
+		   }catch(e){
+			   //igone
+		   }
+		   
+	try{
+		var _targetQuantity = jQuery(".item-quantity");
+		var _targetStock = jQuery(".responsive-stock-target");
+
+	  
+	   	for(var i = 0; i < _targetQuantity.length; i++){
+       		_targetStock[i].innerHTML = 'Cantidad: <strong>' + _targetQuantity[i].innerHTML + '</strong>';
+     	}
+
+   	}catch(e){
+			   //igone
+	}
+
+
+	try{
+		var _targetShippingDate = jQuery(".requestedShippingDate");
+		var _targetItemremoveTarget = jQuery(".responsive-itemremove-target");
+ 
+		for(var i = 0; i < _targetShippingDate.length; i++){
+		   _targetItemremoveTarget[i].innerHTML = '<strong>ENTREGA: </strong>' + _targetShippingDate[i].innerHTML;
+		}
+	}catch(e){
+		//igone
+	} 		
+
+
+	try{
+		//var _targetprice = jQuery(".price");
+		var _targetTipoProd = jQuery(".tipo_prod");
+		var  _targetprice = jQuery(".total");
+		
+
+	    for(var i = 0; i < _targetprice.length; i++){	    	
+	    	_targetTipoProd[i].innerHTML ='<span class="PriceSpanText"> Precio Total: </span><span class="PriceSpan">' + _targetprice[i].innerHTML + "</span>";    
+		   
+     	}
+    }catch(e){
+		//igone
+	} 	 	
+
+	try{
+		var _targetShippingPrice = jQuery(".shipping_price");
+		var _targetPriceProduct = jQuery(".priceProduct");
+ 
+     	for(var i = 0; i < _targetShippingPrice.length; i++){
+		   _targetPriceProduct[i].innerHTML = '<span class="PriceSpanText"> Precio por unidad: </span><span class="PriceSpan">' +  _targetShippingPrice[i].innerHTML + "</span>";
+     	}
+    }catch(e){
+		//igone
+	} 
+
+     	
+
+
+         	jQuery.breakpoint({
+		        condition: function () {
+		            return window.matchMedia('only screen and (max-width:640px)').matches;
+		        },
+		        enter: function () {
+
+		        	var _targetWarranty = jQuery(".responsive-warranty-target");
+					var _contentWarranty = jQuery(".promo_discount_desc");
+
+		     		for(var i = 0; i < _contentWarranty.length; i++){                  
+		     			var cont_warranty = jQuery((_targetWarranty)[i]).html();
+                		jQuery((_contentWarranty)[i]).contents().appendTo(jQuery((_targetWarranty)[i]));	     		   	
+         			} 
+
+				},exit:function(){ 
+						        		
+					var _targetWarranty = jQuery(".responsive-warranty-target");
+					var _contentWarranty = jQuery(".promo_discount_desc");
+
+		     		for(var i = 0; i < _contentWarranty.length; i++){                  
+		     			var cont_warranty = jQuery((_targetWarranty)[i]).html();
+                		jQuery((_targetWarranty)[i]).contents().appendTo(jQuery((_contentWarranty)[i]));	     		   	
+         			} 
+
+
+				}
+			});
+
+
+
+		jQuery('.btn_promo_carro').magnificPopup({
+            type: 'inline'
+        }); 
+        jQuery('.free_gift_container').magnificPopup({
+           type: 'inline'
+         });
+
+          
+    }  
+      
+    CambiaInfo();
+    dojo.subscribe("ajaxRequestCompleted", CambiaInfo );
+     
+        
+  });
+
+
+
+function refresh(){
+   jQuery('.actualizado').removeClass('showglobe')
+}
+
+
+    
+

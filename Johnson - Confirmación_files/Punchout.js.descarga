@@ -1,0 +1,135 @@
+//-----------------------------------------------------------------
+// Licensed Materials - Property of IBM
+//
+// WebSphere Commerce
+//
+// (C) Copyright IBM Corp. 2009 All Rights Reserved.
+//
+// US Government Users Restricted Rights - Use, duplication or
+// disclosure restricted by GSA ADP Schedule Contract with
+// IBM Corp.
+//-----------------------------------------------------------------
+
+// Punchout.js
+wc.service.declare({
+        id: "AjaxRepayPayment",
+        actionId: "AjaxRepayPayment",
+        url: "PunchoutPaymentRepay",
+        formId: ""
+        ,successHandler: function(serviceResponse) {
+            PunchoutJS.handleResponse(serviceResponse.orderId);
+            MessageHelper.hideAndClearMessage();
+            setTimeout('cursor_clear()',3000);
+        }
+        ,failureHandler: function(serviceResponse) {
+
+            if (serviceResponse.errorMessage) {
+                MessageHelper.displayErrorMessage(serviceResponse.errorMessage);
+            } 
+            else {
+                 if (serviceResponse.errorMessageKey) {
+                    MessageHelper.displayErrorMessage(serviceResponse.errorMessageKey);
+                 }
+            }
+            cursor_clear();
+        }
+
+    })
+    
+PunchoutJS={
+	
+	divId:"",
+	
+	sameWindow:true,
+	
+	delay:2000,
+	
+	popupMaskDiv:function(popupDivId, popupButtonId, popupMaskId) {
+		if (popupDivId == null) {
+			popupDivId = "popupDiv";
+		}
+		if (popupButtonId == null) {
+			popupButtonId = "popupButton";
+		}
+		if (popupMaskId == null) {
+			popupMaskId = "popupMask";
+		}
+		if (document.getElementById(popupMaskId)) document.removeChild(document.getElementById(popupMaskId));
+		// div
+		var popupDiv = document.getElementById(popupDivId);
+		popupDiv.style.display = "block";
+		popupDiv.style.position = "fixed";
+		popupDiv.style.zIndex = "9999";
+		popupDiv.style.top = "100px";
+		popupDiv.style.left = (parseInt(document.body.scrollWidth) - 300) / 2 + "px";
+		// button
+		var popupButton = document.getElementById(popupButtonId);
+		popupButton.onclick = function() {
+			location.reload();
+		}
+		// mask
+		var popupMask = document.createElement("div");
+		popupMask.id = popupMaskId;
+		popupMask.style.position = "absolute";
+		popupMask.style.zIndex = "9998";
+		popupMask.style.top = "0px";
+		popupMask.style.left = "0px";
+		popupMask.style.width = document.body.scrollWidth + "px";
+		popupMask.style.height = document.body.scrollHeight + "px";
+		popupMask.style.background = "#000";
+		popupMask.style.filter = "alpha(opacity=40)";
+		popupMask.style.opacity = "0.40";
+		document.body.appendChild(popupMask);
+	},
+	
+	popupPage:function(divId, sameWindow) {
+		var div = document.getElementById(divId);
+		var url = div.innerHTML.replace(/(^\s*)|(\s*$)/g, "");
+		var lowerUrl = url.toLowerCase();
+		if (lowerUrl.indexOf('<form') != 0 && lowerUrl.indexOf('&lt;form') != 0) {
+			if (lowerUrl.indexOf('<a') != 0 && lowerUrl.indexOf('&lt;a') != 0) {
+				div.innerHTML = '<a name="punchout_anchor" href="' + url + '" />';
+			} else {
+				div.innerHTML = url;
+			}
+			var a = div.childNodes[0];
+			if (!sameWindow) {
+				a.target = '_blank';
+				window.open(a.href);
+			} else {
+				window.location = a.href;
+			}
+		} else {
+			div.innerHTML = url;
+			var form = div.childNodes[0];
+			form.name = 'punchout_form';
+			if (!sameWindow) {
+				form.target = '_blank';
+				form.submit();
+			} else {
+				form.submit();
+			}
+		}
+	},
+	
+	handleResponse:function(orderId) {
+		setTimeout("PunchoutJS.popupPage(PunchoutJS.divId, PunchoutJS.sameWindow)", this.delay);
+	},
+	
+	repay:function(orderId, piId, divId, sameWindow, timeout) {
+		this.divId = divId;
+		this.sameWindow = sameWindow;
+		this.timeout = timeout;
+		params = [];
+		params["orderId"] = orderId;
+		params["piId"] = piId;
+		dojo.create("div", {innerHTML: "<br>Por favor espera mientras procesamos tu pago", className: 'payment_in_progress'}, dojo.query('.bodycontent')[0], 'last');
+		//For handling multiple clicks
+		if(!submitRequest()){
+			return;
+		}  
+		displayProgressBar();
+		//cursor_wait();
+		wc.service.invoke("AjaxRepayPayment",params);
+	}
+}
